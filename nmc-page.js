@@ -296,6 +296,15 @@
     });
   }
 
+  var CALENDLY_BASE = 'https://calendly.com/teamrollouts-demo/team-demo-onboarding-clone-2?hide_event_type_details=1&hide_gdpr_banner=1&primary_color=5679b5&background_color=ffffff&text_color=191919';
+
+  function redirectToCalendly(firstName, lastName, email) {
+    var url = CALENDLY_BASE
+      + '&name=' + encodeURIComponent(firstName + ' ' + lastName)
+      + '&email=' + encodeURIComponent(email);
+    setTimeout(function() { window.location.href = url; }, 2500);
+  }
+
   /* ========================================
      FORM SUBMIT — SUCCESS STATE
      ======================================== */
@@ -306,12 +315,14 @@
   demoForm.addEventListener('submit', function(e) {
     e.preventDefault();
     var inputs = demoForm.querySelectorAll('input');
-    submitToHubSpot(inputs[0].value, inputs[1].value, inputs[2].value);
+    var fn = inputs[0].value, ln = inputs[1].value, em = inputs[2].value;
+    submitToHubSpot(fn, ln, em);
     if (typeof fbq === 'function') fbq('track', 'Lead');
     demoForm.style.display = 'none';
     formCard.querySelector('.form-card__label').style.display = 'none';
     formCard.querySelector('.form-card__footer').style.display = 'none';
     formSuccess.classList.add('show');
+    redirectToCalendly(fn, ln, em);
   });
 
   /* ========================================
@@ -354,9 +365,11 @@
   popupForm.addEventListener('submit', function(e) {
     e.preventDefault();
     var inputs = popupForm.querySelectorAll('input');
-    submitToHubSpot(inputs[0].value, inputs[1].value, inputs[2].value);
+    var fn = inputs[0].value, ln = inputs[1].value, em = inputs[2].value;
+    submitToHubSpot(fn, ln, em);
     if (typeof fbq === 'function') fbq('track', 'Lead');
-    popupForm.parentElement.innerHTML = '<div style="text-align:center;padding:24px 0;"><div style="font-size:16px;font-weight:700;color:#1d1d1f;margin-bottom:4px;">You\'re in</div><div style="font-size:13px;color:#86868b;">We\'ll be in touch shortly.</div></div>';
+    popupForm.parentElement.innerHTML = '<div style="text-align:center;padding:24px 0;"><div style="font-size:16px;font-weight:700;color:#1d1d1f;margin-bottom:4px;">Thanks!</div><div style="font-size:13px;color:#86868b;">Now let\'s schedule your demo...</div></div>';
+    redirectToCalendly(fn, ln, em);
   });
 
   /* ========================================
@@ -432,9 +445,11 @@
     heroInlineFormEl.addEventListener('submit', function(e) {
       e.preventDefault();
       var inputs = heroInlineFormEl.querySelectorAll('input');
-      submitToHubSpot(inputs[0].value, inputs[1].value, inputs[2].value);
+      var fn = inputs[0].value, ln = inputs[1].value, em = inputs[2].value;
+      submitToHubSpot(fn, ln, em);
       if (typeof fbq === 'function') fbq('track', 'Lead');
-      heroInlineForm.innerHTML = '<div style="text-align:center;padding:8px 0;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">You\'re in \u2014 we\'ll be in touch shortly.</div>';
+      heroInlineForm.innerHTML = '<div style="text-align:center;padding:8px 0;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">Thanks! Now let\'s schedule your demo...</div>';
+      redirectToCalendly(fn, ln, em);
     });
   }
 
