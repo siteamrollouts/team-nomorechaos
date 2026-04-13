@@ -551,66 +551,91 @@ input { font-family: inherit; }
 .pillar-mobile-toggle__indicator.right { transform: translateX(100%); }
 
 /* ========================================
-   USE CASES
+   USE CASES — Spotlight layout on dark bg
    ======================================== */
-.use-cases { padding: 96px 24px; border-bottom: 1px solid var(--border); }
-.use-cases__inner { max-width: var(--max-w); margin: 0 auto; }
-.use-cases__header { text-align: center; margin-bottom: 40px; }
+.use-cases {
+  padding: 96px 24px; position: relative; overflow: hidden;
+  background: #0a0a0a url('Team%20hero%20Background%2001.png') center/cover no-repeat;
+}
+.use-cases::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(10,10,10,0.65);
+  pointer-events: none;
+}
+.use-cases__inner { max-width: var(--max-w); margin: 0 auto; position: relative; z-index: 2; }
+.use-cases__header { text-align: center; margin-bottom: 48px; }
 .use-cases__label {
   font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--text-3); font-weight: 600; margin-bottom: 12px;
+  color: rgba(255,255,255,0.45); font-weight: 600; margin-bottom: 12px;
 }
 .use-cases__headline {
-  font-size: clamp(28px, 3.6vw, 38px); font-weight: 800;
+  font-size: clamp(28px, 3.6vw, 38px); font-weight: 800; color: #fff;
   letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.08;
 }
 .use-cases__subtitle {
-  font-size: 16px; color: var(--text-2); line-height: 1.55;
+  font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.55;
 }
 
-/* Tabs */
+/* Tabs — light on dark */
 .tab-bar {
-  display: flex; gap: 8px; margin-bottom: 40px; overflow-x: auto;
+  display: flex; gap: 6px; margin-bottom: 40px; overflow-x: auto;
   -webkit-overflow-scrolling: touch; padding-bottom: 4px;
   justify-content: center;
 }
 .tab-bar::-webkit-scrollbar { display: none; }
 .tab-btn {
   white-space: nowrap; padding: 10px 22px; border-radius: 100px;
-  font-size: 14px; font-weight: 600; border: 1px solid var(--border);
-  color: var(--text-2); background: #fff;
+  font-size: 14px; font-weight: 600; border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.5); background: transparent;
   transition: all 0.35s var(--ease);
 }
-.tab-btn.active { background: var(--black); color: #fff; border-color: var(--black); }
+.tab-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+.tab-btn.active { background: #fff; color: var(--black); border-color: #fff; }
 
 /* Tab panels */
 .tab-panels { position: relative; }
 .tab-panel { display: none; }
-.tab-panel.active { display: block; animation: fadeUp 0.45s var(--ease); }
+.tab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; animation: fadeUp 0.45s var(--ease); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-.card-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
-  background: var(--border); border: 1px solid var(--border);
-  border-radius: 12px; overflow: hidden;
+/* Featured card (left) */
+.uc-featured {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; padding: 40px 36px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: 340px; position: relative; overflow: hidden;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
-.card-grid__item {
-  padding: 28px 24px;
-  background: var(--bg);
-  transition: background 0.3s var(--ease);
-  opacity: 0; transform: translateY(10px);
-  animation: fadeUp 0.45s var(--ease) forwards;
+.uc-featured::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,96,2,0.15), transparent 70%);
 }
-.card-grid__item:nth-child(1) { animation-delay: 0ms; }
-.card-grid__item:nth-child(2) { animation-delay: 80ms; }
-.card-grid__item:nth-child(3) { animation-delay: 160ms; }
-.card-grid__item:nth-child(4) { animation-delay: 240ms; }
-.card-grid__item:hover { background: var(--bg-2); }
-.card-title {
-  font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text);
-  letter-spacing: -0.01em;
+.uc-featured__num {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--orange); margin-bottom: 12px;
 }
-.card-desc { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+.uc-featured__title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.25; }
+.uc-featured__desc { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.55; }
+
+/* Stacked cards (right) */
+.uc-stack { display: flex; flex-direction: column; gap: 12px; }
+.uc-row {
+  display: flex; gap: 16px; align-items: center;
+  padding: 20px 24px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  transition: all 0.25s var(--ease);
+  flex: 1;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.uc-row:hover { background: rgba(255,255,255,0.08); transform: translateX(4px); }
+.uc-row__num {
+  font-size: 28px; font-weight: 800; color: rgba(255,255,255,0.1); line-height: 1;
+  min-width: 36px;
+}
+.uc-row__title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+.uc-row__desc { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.45; }
 
 /* ========================================
    FORM CTA
@@ -869,6 +894,8 @@ input { font-family: inherit; }
   .form-row { flex-direction: column; }
   .footer { flex-direction: column; text-align: center; }
   .pillars, .use-cases, .value-prop { padding: 64px 20px; }
+  .tab-panel.active { grid-template-columns: 1fr; }
+  .uc-featured { min-height: 240px; padding: 32px 28px; }
   .form-cta { padding: 80px 20px; }
   .product-preview { padding: 0 0 64px; }
 
@@ -1208,7 +1235,7 @@ input { font-family: inherit; }
 </section>
 
 <!-- ========================================
-     USE CASES
+     USE CASES — Spotlight layout
      ======================================== -->
 <section class="use-cases sr" id="useCases">
   <div class="use-cases__inner">
@@ -1226,107 +1253,55 @@ input { font-family: inherit; }
     </div>
 
     <div class="tab-panels">
-      <!-- Label Managers -->
       <div class="tab-panel active" id="tab-label">
-        <div class="card-grid">
-          <div class="card-grid__item">
-
-            <div class="card-title">Cross-roster visibility</div>
-            <div class="card-desc">See every release across every artist in one view. Know what's on track, what's at risk, and where to focus today.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Budget oversight</div>
-            <div class="card-desc">Track spend across releases and artists in real time. No more end-of-quarter surprises.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Team performance</div>
-            <div class="card-desc">Understand who's delivering, what's bottlenecking, and where your process breaks down &mdash; with data, not gut feel.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Strategic planning</div>
-            <div class="card-desc">Map your release calendar against market windows, competitor drops, and cultural moments.</div>
-          </div>
+        <div class="uc-featured">
+          <div class="uc-featured__num">01</div>
+          <div class="uc-featured__title">Cross-roster visibility</div>
+          <div class="uc-featured__desc">See every release across every artist in one view. Know what's on track, what's at risk, and where to focus today.</div>
+        </div>
+        <div class="uc-stack">
+          <div class="uc-row"><div class="uc-row__num">02</div><div><div class="uc-row__title">Budget oversight</div><div class="uc-row__desc">Track spend across releases and artists in real time. No more end-of-quarter surprises.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">03</div><div><div class="uc-row__title">Team performance</div><div class="uc-row__desc">Understand who's delivering, what's bottlenecking &mdash; with data, not gut feel.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">04</div><div><div class="uc-row__title">Strategic planning</div><div class="uc-row__desc">Map your release calendar against market windows, competitor drops, and cultural moments.</div></div></div>
         </div>
       </div>
 
-      <!-- Artist Managers -->
       <div class="tab-panel" id="tab-artist">
-        <div class="card-grid">
-          <div class="card-grid__item">
-
-            <div class="card-title">Single artist command centre</div>
-            <div class="card-desc">Timeline, budget, assets, comms &mdash; everything about your artist's release in one place.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Stakeholder updates</div>
-            <div class="card-desc">Generate release status updates for artists, labels, and partners in one click.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Deadline tracking</div>
-            <div class="card-desc">Never miss a playlist pitch window or asset delivery date. Smart notifications before things are late.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Cross-functional coordination</div>
-            <div class="card-desc">Keep PR, social, paid, and distribution aligned without being the human glue.</div>
-          </div>
+        <div class="uc-featured">
+          <div class="uc-featured__num">01</div>
+          <div class="uc-featured__title">Single artist command centre</div>
+          <div class="uc-featured__desc">Timeline, budget, assets, comms &mdash; everything about your artist's release in one place.</div>
+        </div>
+        <div class="uc-stack">
+          <div class="uc-row"><div class="uc-row__num">02</div><div><div class="uc-row__title">Stakeholder updates</div><div class="uc-row__desc">Generate release status updates for artists, labels, and partners in one click.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">03</div><div><div class="uc-row__title">Deadline tracking</div><div class="uc-row__desc">Never miss a playlist pitch window or asset delivery date. Smart notifications before things are late.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">04</div><div><div class="uc-row__title">Cross-functional coordination</div><div class="uc-row__desc">Keep PR, social, paid, and distribution aligned without being the human glue.</div></div></div>
         </div>
       </div>
 
-      <!-- Marketing -->
       <div class="tab-panel" id="tab-marketing">
-        <div class="card-grid">
-          <div class="card-grid__item">
-
-            <div class="card-title">Campaign planning</div>
-            <div class="card-desc">Build multi-channel marketing plans connected to your release timeline. Social, paid, email &mdash; all in sync.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Content production</div>
-            <div class="card-desc">Brief, draft, review, and approve assets without leaving the platform. AI Teammate handles first drafts.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Performance tracking</div>
-            <div class="card-desc">Connect marketing activity to streaming outcomes. See what's working and shift spend in real time.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Multi-artist coordination</div>
-            <div class="card-desc">Run campaigns across multiple releases without losing the plot. Shared calendars, separate budgets.</div>
-          </div>
+        <div class="uc-featured">
+          <div class="uc-featured__num">01</div>
+          <div class="uc-featured__title">Campaign planning</div>
+          <div class="uc-featured__desc">Build multi-channel marketing plans connected to your release timeline. Social, paid, email &mdash; all in sync.</div>
+        </div>
+        <div class="uc-stack">
+          <div class="uc-row"><div class="uc-row__num">02</div><div><div class="uc-row__title">Content production</div><div class="uc-row__desc">Brief, draft, review, and approve assets without leaving the platform. AI Teammate handles first drafts.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">03</div><div><div class="uc-row__title">Performance tracking</div><div class="uc-row__desc">Connect marketing activity to streaming outcomes. See what's working and shift spend in real time.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">04</div><div><div class="uc-row__title">Multi-artist coordination</div><div class="uc-row__desc">Run campaigns across multiple releases without losing the plot. Shared calendars, separate budgets.</div></div></div>
         </div>
       </div>
 
-      <!-- A&R -->
       <div class="tab-panel" id="tab-ar">
-        <div class="card-grid">
-          <div class="card-grid__item">
-
-            <div class="card-title">Release readiness</div>
-            <div class="card-desc">Know exactly where every release stands &mdash; masters delivered, metadata confirmed, artwork approved.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Market intelligence</div>
-            <div class="card-desc">Understand competitive position, audience overlap, and genre trends before you set a release date.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Playlist strategy</div>
-            <div class="card-desc">Track pitch windows, submission deadlines, and editorial contacts. Never miss an opportunity.</div>
-          </div>
-          <div class="card-grid__item">
-
-            <div class="card-title">Seamless handoff</div>
-            <div class="card-desc">Hand off to marketing, PR, and social once A&amp;R decisions are locked. Context travels with the release.</div>
-          </div>
+        <div class="uc-featured">
+          <div class="uc-featured__num">01</div>
+          <div class="uc-featured__title">Release readiness</div>
+          <div class="uc-featured__desc">Know exactly where every release stands &mdash; masters delivered, metadata confirmed, artwork approved.</div>
+        </div>
+        <div class="uc-stack">
+          <div class="uc-row"><div class="uc-row__num">02</div><div><div class="uc-row__title">Market intelligence</div><div class="uc-row__desc">Understand competitive position, audience overlap, and genre trends before you set a release date.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">03</div><div><div class="uc-row__title">Playlist strategy</div><div class="uc-row__desc">Track pitch windows, submission deadlines, and editorial contacts. Never miss an opportunity.</div></div></div>
+          <div class="uc-row"><div class="uc-row__num">04</div><div><div class="uc-row__title">Seamless handoff</div><div class="uc-row__desc">Hand off to marketing, PR, and social once A&amp;R decisions are locked. Context travels with the release.</div></div></div>
         </div>
       </div>
     </div>
