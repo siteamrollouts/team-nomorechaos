@@ -271,7 +271,7 @@
      ======================================== */
   var HS_PORTAL = '244049776';
   var HS_FORM = 'b9f79294-23dc-453c-a339-136bf31d99e7';
-  var HS_URL = 'https://api.hsforms.com/submissions/v3/integration/submit/' + HS_PORTAL + '/' + HS_FORM;
+  var HS_URL = 'https://api-na2.hsforms.com/submissions/v3/integration/submit/' + HS_PORTAL + '/' + HS_FORM;
 
   function submitToHubSpot(firstName, lastName, email) {
     var data = {
@@ -289,11 +289,13 @@
     var hutk = document.cookie.replace(/(?:(?:^|.*;\s*)hubspotutk\s*=\s*([^;]*).*$)|^.*$/, '$1');
     if (hutk) data.context.hutk = hutk;
 
-    fetch(HS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+    try {
+      fetch(HS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch(e) {}
   }
 
   var CALENDLY_BASE = 'https://calendly.com/teamrollouts-demo/team-demo-onboarding-clone-2?hide_event_type_details=1&hide_gdpr_banner=1&primary_color=5679b5&background_color=ffffff&text_color=191919';
