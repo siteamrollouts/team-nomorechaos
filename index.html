@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team — The Operating System for Music Releases</title>
+<meta name="description" content="Stop juggling spreadsheets, Slack threads, and email chains. One platform for your entire rollout.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ========================================
+   RESET & BASE
+   ======================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1d1d1f; background: #fff; overflow-x: hidden; }
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input { font-family: inherit; }
+
+/* ========================================
+   DESIGN TOKENS
+   ======================================== */
+:root {
+  --black: #111111;
+  --dark: #0a0a0a;
+  --text: #1d1d1f;
+  --text-2: #6e6e73;
+  --text-3: #86868b;
+  --border: #e0e0e0;
+  --bg: #ffffff;
+  --bg-2: #f5f5f7;
+  --orange: #F56002;
+  --blue: #3B82F6;
+  --max-w: 1120px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ========================================
+   SCROLL REVEAL ANIMATIONS
+   ======================================== */
+.sr, .sr-blur, .sr-scale {
+  opacity: 0;
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease), filter 0.8s var(--ease);
+}
+.sr { transform: translateY(40px); }
+.sr-blur { transform: translateY(20px); filter: blur(8px); }
+.sr-scale { transform: scale(0.95); }
+.sr.visible, .sr-blur.visible, .sr-scale.visible {
+  opacity: 1; transform: translateY(0) scale(1); filter: blur(0);
+}
+.sr-d1 { transition-delay: 80ms; }
+.sr-d2 { transition-delay: 140ms; }
+.sr-d3 { transition-delay: 200ms; }
+.sr-d4 { transition-delay: 260ms; }
+.sr-d5 { transition-delay: 320ms; }
+
+/* ========================================
+   NAV — Harbinger-style scroll transition
+   ======================================== */
+.nav-wrapper {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  padding: 0;
+  transition: padding 0.35s ease-out;
+}
+.nav-wrapper.scrolled {
+  padding: 16px 20px 0;
+}
+.nav-wrapper nav {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; padding: 0 24px;
+  background: transparent;
+  transition: background 0.35s ease-out, border-radius 0.35s ease-out, box-shadow 0.35s ease-out;
+}
+.nav-wrapper.scrolled nav {
+  background: rgba(255,255,255,0.98);
+  border-radius: 4px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+}
+.nav-logo { position: relative; height: 22px; width: 80px; }
+.nav-logo img { height: 22px; position: absolute; top: 0; left: 0; transition: opacity 0.35s ease-out; }
+.logo-light { opacity: 1; }
+.logo-dark { opacity: 0; }
+.nav-wrapper.scrolled .logo-light { opacity: 0; }
+.nav-wrapper.scrolled .logo-dark { opacity: 1; }
+.nav-link {
+  color: #fff; font-size: 13px; font-weight: 600;
+  padding: 8px 18px; border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.25);
+  transition: color 0.35s ease-out, border-color 0.35s ease-out, background 0.35s ease-out;
+}
+.nav-link:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+.nav-wrapper.scrolled .nav-link {
+  color: #fff; background: var(--black); border-color: var(--black);
+}
+.nav-wrapper.scrolled .nav-link:hover {
+  background: #222; border-color: #222;
+}
+
+/* ========================================
+   HERO
+   ======================================== */
+.hero {
+  position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 40%, #1a1a2e, #0a0a0a);
+  overflow: hidden;
+}
+.hero__grain {
+  position: absolute; inset: 0; opacity: 0.035; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+.hero__orb {
+  position: absolute; width: 600px; height: 600px; border-radius: 50%;
+  filter: blur(120px); opacity: 0.12; pointer-events: none;
+}
+.hero__orb--orange { background: var(--orange); top: -200px; left: -100px; }
+.hero__orb--blue { background: #4a6cf7; bottom: -200px; right: -100px; }
+
+/* Notification cards */
+.notif-layer { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.hero-notif-overlay { position: absolute; inset: 0; background: rgba(10,10,10,0); z-index: 3; pointer-events: none; transition: background 0s; }
+@media (max-width: 991px) { .hero-notif-overlay { background: rgba(10,10,10,0.25); } }
+@media (max-width: 768px) { .hero-notif-overlay { background: rgba(10,10,10,0.45); } }
+@media (max-width: 480px) { .hero-notif-overlay { background: rgba(10,10,10,0.55); } }
+.notif {
+  position: absolute; display: flex; gap: 10px; align-items: flex-start;
+  background: rgba(255,255,255,0.95); border-radius: 14px;
+  padding: 12px 16px; max-width: 320px; min-width: 240px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.12);
+  pointer-events: none; will-change: transform;
+  opacity: 0; transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.notif.notif-in { opacity: var(--notif-opacity, 0.95); }
+.notif[data-layer="near"] { --notif-opacity: 0.95; }
+.notif[data-layer="mid"] { --notif-opacity: 0.7; }
+.notif[data-layer="far"] { --notif-opacity: 0.35; }
+.notif__icon {
+  width: 34px; height: 34px; min-width: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.notif__icon svg { width: 18px; height: 18px; }
+.notif__body { flex: 1; min-width: 0; }
+.notif__row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.notif__title { font-size: 13px; font-weight: 600; color: #1d1d1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.notif__time { font-size: 11px; color: #86868b; white-space: nowrap; flex-shrink: 0; }
+.notif__msg { font-size: 12px; color: #6e6e73; margin-top: 2px; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Hero centre content */
+.hero__content {
+  position: relative; z-index: 10; text-align: center;
+  max-width: 640px; padding: 0 24px;
+}
+.hero__eyebrow {
+  color: var(--orange); text-transform: uppercase; font-size: 13px;
+  font-weight: 600; letter-spacing: 0.08em; margin-bottom: 20px;
+}
+.hero__h1 {
+  font-size: clamp(36px, 5.6vw, 56px); font-weight: 800; color: #fff;
+  line-height: 1.08; margin-bottom: 20px; letter-spacing: -0.02em;
+}
+.hero__body {
+  font-size: 17px; color: rgba(255,255,255,0.55); line-height: 1.55;
+  max-width: 480px; margin: 0 auto 36px;
+}
+.hero__actions { display: flex; gap: 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.btn-orange {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--orange); color: #fff; font-size: 15px; font-weight: 600;
+  padding: 14px 32px; border-radius: 10px;
+  transition: background 0.3s, transform 0.2s;
+}
+.btn-orange:hover { background: #e05500; transform: translateY(-1px); }
+.hero__ghost {
+  color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 500;
+  transition: color 0.3s;
+}
+.hero__ghost:hover { color: rgba(255,255,255,0.8); }
+
+/* Hero inline expanding form — replaces the CTA button */
+.hero__actions { position: relative; }
+.hero__actions.form-mode .btn-orange {
+  opacity: 0;
+  transform: scale(0.92) translateY(-4px);
+  pointer-events: none;
+  position: absolute;
+}
+.hero__actions.form-mode .hero__ghost {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+}
+.btn-orange, .hero__ghost {
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-inline-form {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+.hero-inline-form.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.hero-inline-form__inner {
+  overflow: hidden;
+}
+.hero-inline-form__fields {
+  display: flex;
+  gap: 8px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.hero-inline-form__input {
+  flex: 1;
+  min-width: 100px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #fff;
+  transition: border-color 0.2s;
+}
+.hero-inline-form__input::placeholder { color: rgba(255,255,255,0.3); }
+.hero-inline-form__input:focus { outline: none; border-color: var(--orange); }
+.hero-inline-form__btn {
+  background: var(--orange);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.hero-inline-form__btn:hover { background: #e05500; }
+.hero-inline-form__close {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+.hero-inline-form__close-btn {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.hero-inline-form__close-btn:hover { color: rgba(255,255,255,0.6); }
+@media (max-width: 768px) {
+  .hero-inline-form { display: none !important; }
+  .hero__actions.form-mode .btn-orange,
+  .hero__actions.form-mode .hero__ghost { opacity: 1; pointer-events: auto; position: static; transform: none; }
+}
+
+/* ========================================
+   PRODUCT PREVIEW — Screenshot image
+   ======================================== */
+.product-preview {
+  padding: 0 0 96px;
+}
+.product-preview-inner {
+  margin: 0 auto;
+  will-change: transform;
+}
+.product-frame {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  position: relative;
+  cursor: pointer;
+  will-change: border-radius, border-color;
+}
+.product-frame:hover .play-btn { transform: translate(-50%,-50%) scale(1.08); }
+.product-frame:hover .play-btn::before { opacity: 0.12; }
+.product-img {
+  width: 100%; display: block;
+}
+.play-btn {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+  z-index: 2;
+}
+.play-btn::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.06);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.play-btn svg {
+  width: 28px; height: 28px;
+  margin-left: 3px;
+  fill: var(--black);
+}
+
+/* Video modal */
+.video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s cubic-bezier(0.16,1,0.3,1), visibility 0.35s;
+}
+.video-modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+.video-modal__bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.video-modal__close {
+  position: absolute;
+  top: 24px; right: 24px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  transition: background 0.2s;
+}
+.video-modal__close:hover { background: rgba(255,255,255,0.2); }
+.video-modal__close svg { width: 18px; height: 18px; stroke: #fff; fill: none; }
+.video-modal__content {
+  position: relative;
+  z-index: 2;
+  max-height: 85vh;
+  max-width: 420px;
+  width: 90%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  transform: scale(0.92) translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.video-modal.open .video-modal__content {
+  transform: scale(1) translateY(0);
+}
+.video-modal__content video {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #000;
+}
+.sound-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 100px;
+  letter-spacing: 0.03em;
+  animation: soundPulse 2s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.sound-hint.show { opacity: 1; }
+.sound-hint svg { width: 14px; height: 14px; }
+@keyframes soundPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ========================================
+   VALUE PROP
+   ======================================== */
+.value-prop {
+  padding: 96px 24px 80px;
+  text-align: center;
+}
+.value-prop__text {
+  max-width: 620px; margin: 0 auto;
+  font-size: clamp(24px, 3.2vw, 34px); font-weight: 600;
+  line-height: 1.35; color: var(--text);
+}
+.value-prop__text span { color: var(--orange); }
+.vp-cta {
+  display: inline-block;
+  margin-top: 28px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+.vp-cta:hover { color: var(--orange); }
+
+/* ========================================
+   TWO PILLARS — Side-by-side columns
+   ======================================== */
+.pillars {
+  padding: 96px 24px; border-bottom: 1px solid var(--border);
+}
+.pillars__inner { max-width: var(--max-w); margin: 0 auto; }
+.pillars__header { text-align: center; margin-bottom: 56px; }
+.pillars__label {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-3); font-weight: 600; margin-bottom: 12px;
+}
+.pillars__headline {
+  font-size: clamp(28px, 3.6vw, 38px); font-weight: 800;
+  letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.1;
+}
+.pillars__subtitle {
+  font-size: 16px; color: var(--text-2); line-height: 1.55;
+}
+
+/* Pillar columns grid */
+.pillars__grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  align-items: start;
+}
+.pillar-col {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; transition: box-shadow 0.3s;
+}
+.pillar-col:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
+.pillar-col__body { padding: 32px; }
+.pillar-col__number {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 14px;
+}
+.pillar-col__headline {
+  font-size: 19px; font-weight: 700; color: var(--text);
+  margin-bottom: 8px; line-height: 1.25; letter-spacing: -0.015em;
+}
+.pillar-col__desc {
+  font-size: 14px; color: var(--text-2); line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* Drawer trigger */
+.pillar-col__trigger {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 20px;
+  font-size: 12px; font-weight: 600; color: var(--text-3);
+  cursor: default; user-select: none;
+  transition: color 0.2s;
+}
+.pillar-col:hover .pillar-col__trigger { color: var(--orange); }
+.pillar-col__trigger svg {
+  width: 14px; height: 14px; stroke: currentColor; fill: none;
+  transition: transform 0.3s var(--ease);
+}
+.pillar-col.drawer-open .pillar-col__trigger svg { transform: rotate(180deg); }
+
+/* Drawer */
+.pillar-drawer {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pillar-col.drawer-open .pillar-drawer { max-height: 600px; }
+
+.pillar-features {
+  list-style: none; padding: 8px 0 0;
+}
+.pillar-feature {
+  display: flex; gap: 12px; align-items: baseline;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+.pillar-col.drawer-open .pillar-feature { opacity: 1; transform: none; }
+.pillar-feature__tag {
+  font-size: 10px; font-weight: 700; color: var(--text-3);
+  background: var(--bg-2); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 4px; letter-spacing: 0.04em;
+  white-space: nowrap; flex-shrink: 0;
+}
+.pillar-feature__text { flex: 1; min-width: 0; }
+.pillar-feature__name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.pillar-feature__desc { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+
+/* Mobile: stack + tap toggle */
+.pillar-mobile-toggle { display: none; margin-bottom: 24px; }
+.pillar-mobile-toggle__bar {
+  display: inline-flex; position: relative;
+  background: var(--bg-2); border-radius: 12px;
+  padding: 4px; border: 1px solid var(--border);
+}
+.pillar-mobile-toggle__btn {
+  position: relative; z-index: 2;
+  padding: 10px 24px; font-size: 14px; font-weight: 600;
+  color: var(--text-2); border-radius: 9px;
+  transition: color 0.3s; background: transparent;
+}
+.pillar-mobile-toggle__btn.active { color: #fff; }
+.pillar-mobile-toggle__indicator {
+  position: absolute; top: 4px; left: 4px;
+  height: calc(100% - 8px); width: calc(50% - 4px);
+  background: var(--black); border-radius: 9px;
+  transition: transform 0.4s var(--ease);
+}
+.pillar-mobile-toggle__indicator.right { transform: translateX(100%); }
+
+/* ========================================
+   USE CASES
+   ======================================== */
+.use-cases { padding: 96px 24px; border-bottom: 1px solid var(--border); }
+.use-cases__inner { max-width: var(--max-w); margin: 0 auto; }
+.use-cases__header { text-align: center; margin-bottom: 40px; }
+.use-cases__label {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-3); font-weight: 600; margin-bottom: 12px;
+}
+.use-cases__headline {
+  font-size: clamp(28px, 3.6vw, 38px); font-weight: 800;
+  letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.1;
+}
+.use-cases__subtitle {
+  font-size: 16px; color: var(--text-2); line-height: 1.55;
+}
+
+/* Tabs */
+.tab-bar {
+  display: flex; gap: 8px; margin-bottom: 40px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch; padding-bottom: 4px;
+  justify-content: center;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  white-space: nowrap; padding: 10px 22px; border-radius: 100px;
+  font-size: 14px; font-weight: 600; border: 1px solid var(--border);
+  color: var(--text-2); background: #fff;
+  transition: all 0.35s var(--ease);
+}
+.tab-btn.active { background: var(--black); color: #fff; border-color: var(--black); }
+
+/* Tab panels */
+.tab-panels { position: relative; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeUp 0.45s var(--ease); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+.card-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.card-grid__item {
+  padding: 28px 24px;
+  background: var(--bg);
+  transition: background 0.3s var(--ease);
+  opacity: 0; transform: translateY(10px);
+  animation: fadeUp 0.45s var(--ease) forwards;
+}
+.card-grid__item:nth-child(1) { animation-delay: 0ms; }
+.card-grid__item:nth-child(2) { animation-delay: 80ms; }
+.card-grid__item:nth-child(3) { animation-delay: 160ms; }
+.card-grid__item:nth-child(4) { animation-delay: 240ms; }
+.card-grid__item:hover { background: var(--bg-2); }
+.card-title {
+  font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text);
+  letter-spacing: -0.01em;
+}
+.card-desc { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+
+/* ========================================
+   FORM CTA
+   ======================================== */
+.form-cta {
+  position: relative; padding: 120px 24px;
+  background: var(--dark); overflow: hidden;
+}
+/* Animated gradient mesh background */
+.form-cta__mesh {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(245,96,2,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(59,130,246,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(245,96,2,0.06) 0%, transparent 40%);
+  animation: meshPulse 8s ease-in-out infinite alternate;
+}
+@keyframes meshPulse {
+  0% {
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(245,96,2,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 50%, rgba(59,130,246,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(245,96,2,0.06) 0%, transparent 40%);
+  }
+  50% {
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(245,96,2,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 60%, rgba(59,130,246,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 40% 70%, rgba(245,96,2,0.1) 0%, transparent 40%);
+  }
+  100% {
+    background:
+      radial-gradient(ellipse at 25% 60%, rgba(245,96,2,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 75% 40%, rgba(59,130,246,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 55% 85%, rgba(245,96,2,0.07) 0%, transparent 40%);
+  }
+}
+.form-cta__inner {
+  max-width: 520px; margin: 0 auto; position: relative; z-index: 2; text-align: center;
+}
+.form-cta__badge {
+  display: inline-block; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 100px;
+  padding: 6px 16px; margin-bottom: 20px;
+}
+.form-cta__h2 {
+  font-size: clamp(30px, 4vw, 44px); font-weight: 800; color: #fff;
+  letter-spacing: -0.02em; margin-bottom: 16px;
+}
+.form-cta__sub {
+  font-size: 16px; color: rgba(255,255,255,0.45); line-height: 1.55; margin-bottom: 40px;
+}
+.form-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 36px 32px; text-align: left;
+  position: relative;
+  box-shadow: 0 0 40px rgba(245,96,2,0.04), 0 0 80px rgba(59,130,246,0.03);
+  animation: cardGlow 4s ease-in-out infinite alternate;
+}
+@keyframes cardGlow {
+  0% { box-shadow: 0 0 40px rgba(245,96,2,0.04), 0 0 80px rgba(59,130,246,0.03); border-color: rgba(255,255,255,0.08); }
+  100% { box-shadow: 0 0 50px rgba(245,96,2,0.07), 0 0 90px rgba(59,130,246,0.05); border-color: rgba(255,255,255,0.12); }
+}
+.form-card__label {
+  text-align: center;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--orange); font-weight: 700; margin-bottom: 24px;
+}
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.form-row input { flex: 1; }
+.form-card input {
+  width: 100%; padding: 14px 16px; border-radius: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; font-size: 14px; outline: none;
+  transition: border-color 0.3s;
+}
+.form-card input::placeholder { color: rgba(255,255,255,0.3); }
+.form-card input:focus { border-color: var(--orange); }
+.form-card__email { margin-bottom: 20px; }
+.form-card__btn {
+  width: 100%; padding: 15px; border-radius: 10px;
+  background: var(--orange); color: #fff; font-size: 15px; font-weight: 700;
+  transition: background 0.3s, transform 0.2s;
+}
+.form-card__btn:hover { background: #e05500; transform: translateY(-1px); }
+.form-card__footer {
+  font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 16px; text-align: center;
+  line-height: 1.6;
+}
+.form-card__footer span { display: inline; }
+@media (max-width: 480px) {
+  .form-card__footer span { display: block; margin-top: 4px; }
+}
+
+/* Form success */
+.form-success {
+  display: none; text-align: center; padding: 40px 0;
+}
+.form-success.show { display: block; }
+.form-success__check {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 16px;
+  background: var(--orange); display: flex; align-items: center; justify-content: center;
+}
+.form-success__check svg { width: 28px; height: 28px; }
+.form-success__h3 { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.form-success__p { font-size: 14px; color: rgba(255,255,255,0.45); }
+
+/* ========================================
+   FORM SECTION NOTIFICATIONS
+   ======================================== */
+.form-notifs { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.form-notif {
+  position: absolute;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 11px;
+  min-width: 220px; max-width: 280px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.12);
+  filter: blur(3px);
+  opacity: 0.18;
+  will-change: transform;
+}
+.form-notif .notif__icon { width: 30px; height: 30px; min-width: 30px; border-radius: 7px; }
+.form-notif .notif__icon svg { width: 16px; height: 16px; }
+.form-notif .notif__title { font-size: 12px; }
+.form-notif .notif__msg { font-size: 11px; }
+.form-notif .notif__time { font-size: 10px; }
+.form-notif-overlay { position: absolute; inset: 0; background: rgba(10,10,10,0.3); z-index: 1; pointer-events: none; }
+
+/* ========================================
+   FORM POPUP
+   ======================================== */
+.form-popup {
+  position: fixed;
+  bottom: 80px; right: 28px;
+  width: 360px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04);
+  z-index: 1100;
+  opacity: 0;
+  transform: translateY(16px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16,1,0.3,1), transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  overflow: hidden;
+}
+.form-popup.open {
+  opacity: 1; transform: none; pointer-events: auto;
+}
+.form-popup__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 0;
+}
+.form-popup__title {
+  font-size: 16px; font-weight: 700; color: #1d1d1f;
+}
+.form-popup__close {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #f5f5f7; border: none; cursor: pointer;
+  transition: background 0.2s;
+}
+.form-popup__close:hover { background: #e8e8e8; }
+.form-popup__close svg { width: 14px; height: 14px; color: #6e6e73; }
+.form-popup__body { padding: 16px 24px 24px; }
+.form-popup__sub {
+  font-size: 13px; color: #86868b; margin-bottom: 20px;
+}
+.form-popup__row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;
+}
+.form-popup__input {
+  width: 100%;
+  background: #f5f5f7;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px; font-family: inherit;
+  color: #1d1d1f;
+  transition: border-color 0.2s;
+}
+.form-popup__input::placeholder { color: #86868b; }
+.form-popup__input:focus { outline: none; border-color: #F56002; }
+.form-popup__input--full { margin-bottom: 10px; }
+.form-popup__btn {
+  width: 100%;
+  background: #F56002; color: #fff;
+  font-size: 14px; font-weight: 600;
+  padding: 12px; border: none; border-radius: 8px;
+  cursor: pointer; transition: background 0.2s;
+  margin-top: 4px;
+}
+.form-popup__btn:hover { background: #e05800; }
+
+/* ========================================
+   FOOTER
+   ======================================== */
+.footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 40px;
+  background: var(--dark);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-wrap: wrap; gap: 16px;
+}
+.footer__left { display: flex; align-items: center; gap: 8px; }
+.footer__copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+.footer__links { display: flex; gap: 24px; }
+.footer__link { font-size: 12px; color: rgba(255,255,255,0.3); transition: color 0.3s; }
+.footer__link:hover { color: rgba(255,255,255,0.6); }
+
+/* ========================================
+   FLOATING CTA
+   ======================================== */
+.floating-cta {
+  position: fixed; bottom: 28px; right: 28px; z-index: 900;
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.floating-cta__btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--black); color: #fff; font-size: 14px; font-weight: 600;
+  padding: 14px 24px; border-radius: 100px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+.floating-cta__btn:hover { transform: translateY(-1px); }
+.floating-cta.on-dark .floating-cta__btn {
+  background: var(--orange); color: var(--black);
+  box-shadow: 0 8px 24px rgba(245,96,2,0.3);
+}
+.floating-cta.on-dark .floating-cta__btn:hover { background: #ff7020; }
+
+/* Mobile floating bar */
+.floating-bar {
+  display: none;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1100px) {
+  .notif { transform: scale(0.88); }
+}
+@media (max-width: 991px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-wrapper nav { padding: 0 16px; }
+  .nav-wrapper.scrolled { padding: 12px 12px 0; }
+  .notif { transform: scale(0.78); }
+  .notif[data-layer="far"] { display: none; }
+  .hero__content { padding: 0 16px; }
+  .form-row { flex-direction: column; }
+  .footer { flex-direction: column; text-align: center; }
+  .pillars, .use-cases, .value-prop { padding: 64px 20px; }
+  .form-cta { padding: 80px 20px; }
+  .product-preview { padding: 0 0 64px; }
+
+  /* Pillars: stack + tab toggle */
+  .pillars__grid { grid-template-columns: 1fr; }
+  .pillar-mobile-toggle { display: block; text-align: center; }
+  .pillar-col { display: none; }
+  .pillar-col.mobile-active { display: block; }
+
+  .form-popup {
+    bottom: 0; right: 0; left: 0;
+    width: 100%; border-radius: 16px 16px 0 0;
+    transform: translateY(100%);
+  }
+  .form-popup.open { transform: none; }
+  .form-popup__row { grid-template-columns: 1fr; }
+
+  .floating-cta { display: none !important; }
+  .floating-bar {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 900; padding: 12px 20px;
+    background: rgba(17,17,17,0.85); backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    transition: background 0.3s, border-color 0.3s, transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .floating-bar__btn {
+    display: block; width: 100%; padding: 14px; border-radius: 10px;
+    background: var(--black); color: #fff; font-size: 14px; font-weight: 600;
+    text-align: center; border: 1px solid rgba(255,255,255,0.12);
+  }
+}
+@media (max-width: 480px) {
+  .notif { transform: scale(0.7); min-width: 180px; }
+  .notif[data-layer="mid"] { display: none; }
+  .notif__msg { display: none; }
+  .tab-btn { padding: 8px 16px; font-size: 13px; }
+  .pillar-mobile-toggle__btn { padding: 8px 18px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================
+     NAV — Harbinger-style scroll transition
+     ======================================== -->
+<div class="nav-wrapper" id="navWrapper">
+  <nav>
+    <div class="nav-logo">
+      <img class="logo-light" src="https://www.teamrollouts.com/Team%20Logo%20Graident%2002%20+%20Black.svg" alt="Team" style="filter:brightness(0) invert(1)">
+      <img class="logo-dark" src="https://www.teamrollouts.com/Team%20Logo%20Graident%2002%20+%20Black.svg" alt="Team">
+    </div>
+    <a href="https://teamrollouts.com" class="nav-link" target="_blank" rel="noopener">Explore Team &rarr;</a>
+  </nav>
+</div>
+
+<!-- ========================================
+     HERO — Kept exactly as-is
+     ======================================== -->
+<section class="hero" id="hero">
+  <div class="hero__grain"></div>
+  <div class="hero__orb hero__orb--orange"></div>
+  <div class="hero__orb hero__orb--blue"></div>
+
+  <div class="hero-notif-overlay"></div>
+  <div class="notif-layer" id="notifLayer">
+    <!-- NEAR layer -->
+    <div class="notif" data-depth="0.05" data-layer="near" data-float-y="8" data-float-x="3" data-float-dur="5.2" style="top:12%;left:3%;">
+      <div class="notif__icon" style="background:#4A154B;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zm-1.27 0a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.163 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.163 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.163 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zm0-1.27a2.527 2.527 0 0 1-2.52-2.523 2.527 2.527 0 0 1 2.52-2.52h6.315A2.528 2.528 0 0 1 24 15.163a2.528 2.528 0 0 1-2.522 2.523h-6.315z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Sarah from Marketing</span><span class="notif__time">3m ago</span></div>
+        <div class="notif__msg">URGENT!! Where's the latest file??</div>
+      </div>
+    </div>
+
+    <div class="notif" data-depth="0.06" data-layer="near" data-float-y="6" data-float-x="4" data-float-dur="4.8" style="bottom:14%;right:2%;">
+      <div class="notif__icon" style="background:#EA4335;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Re: Album artwork v4.8</span><span class="notif__time">2m ago</span></div>
+        <div class="notif__msg">I can't find where you've put the latest...</div>
+      </div>
+    </div>
+
+    <div class="notif" data-depth="0.055" data-layer="near" data-float-y="7" data-float-x="2" data-float-dur="5.6" style="bottom:28%;left:1%;">
+      <div class="notif__icon" style="background:#F06A6A;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M19.09 16.14a4.91 4.91 0 1 1-4.91-4.91 4.91 4.91 0 0 1 4.91 4.91zm-9.18 0a4.91 4.91 0 1 1-4.91-4.91 4.91 4.91 0 0 1 4.91 4.91zM12 2.77a4.91 4.91 0 1 0 4.91 4.91A4.91 4.91 0 0 0 12 2.77z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Task overdue</span><span class="notif__time">8m ago</span></div>
+        <div class="notif__msg">Submit playlist pitch — 2 days late</div>
+      </div>
+    </div>
+
+    <!-- MID layer -->
+    <div class="notif" data-depth="0.04" data-layer="mid" data-float-y="5" data-float-x="3" data-float-dur="6.2" style="top:8%;right:8%;filter:blur(0.5px);">
+      <div class="notif__icon" style="background:#217346;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M23 1.5q.41 0 .7.3.3.29.3.7v19q0 .41-.3.7-.29.3-.7.3H7q-.41 0-.7-.3-.3-.29-.3-.7V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h5V2.5q0-.41.3-.7.29-.3.7-.3zM1 16.5h14v-9H1zm7.5-2.25h-2.6l-1.4-2.4-1.4 2.4H.59l2.14-3.5L.73 7.3h2.55L4.5 9.6l1.17-2.3h2.51L6.09 10.8zM23 19V2H7v4h8q.41 0 .7.3.3.29.3.7v10q0 .41-.3.7-.29.3-.7.3H7v4zM20 14v-2h-4v2zm0-4V8h-4v2zm0 8v-2h-4v2z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Release Tracker v28.3</span><span class="notif__time">11m ago</span></div>
+        <div class="notif__msg">Sheet has been updated by James</div>
+      </div>
+    </div>
+
+    <div class="notif" data-depth="0.035" data-layer="mid" data-float-y="6" data-float-x="2" data-float-dur="5.8" style="top:38%;right:0%;filter:blur(0.5px);">
+      <div class="notif__icon" style="background:#25D366;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Artist Manager</span><span class="notif__time">5m ago</span></div>
+        <div class="notif__msg">Can we talk urgently about the release...</div>
+      </div>
+    </div>
+
+    <div class="notif" data-depth="0.03" data-layer="mid" data-float-y="4" data-float-x="3" data-float-dur="6.5" style="bottom:8%;left:12%;filter:blur(0.5px);">
+      <div class="notif__icon" style="background:#6161FF;">
+        <svg viewBox="0 0 24 24" fill="#fff"><circle cx="5.5" cy="18.5" r="3.5"/><circle cx="12" cy="12" r="3.5"/><circle cx="18.5" cy="5.5" r="3.5"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Status changed</span><span class="notif__time">14m ago</span></div>
+        <div class="notif__msg">PR outreach moved to Stuck</div>
+      </div>
+    </div>
+
+    <!-- FAR layer -->
+    <div class="notif" data-depth="0.02" data-layer="far" data-float-y="3" data-float-x="2" data-float-dur="7.0" style="top:22%;left:18%;filter:blur(2px);">
+      <div class="notif__icon" style="background:#0066DA;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M7.71 3.5L1.15 15l2.79 4.84L10.5 8.34zM16.29 3.5H7.71l6.56 11.34h8.57zM8.87 15l-2.79 4.84h13.86L22.73 15z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Access requested</span><span class="notif__time">18m ago</span></div>
+        <div class="notif__msg">Tom wants access to Press Assets</div>
+      </div>
+    </div>
+
+    <div class="notif" data-depth="0.015" data-layer="far" data-float-y="4" data-float-x="1" data-float-dur="7.5" style="bottom:32%;right:12%;filter:blur(2px);">
+      <div class="notif__icon" style="background:#4285F4;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Release sync in 15 min</span><span class="notif__time">22m ago</span></div>
+        <div class="notif__msg">Weekly release standup — 4 attendees</div>
+      </div>
+    </div>
+
+    <div class="notif" data-depth="0.022" data-layer="far" data-float-y="3" data-float-x="2" data-float-dur="7.2" style="top:5%;left:40%;filter:blur(2px);">
+      <div class="notif__icon" style="background:#0079BF;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M21 0H3C1.343 0 0 1.343 0 3v18c0 1.656 1.343 3 3 3h18c1.656 0 3-1.344 3-3V3c0-1.657-1.344-3-3-3zM10.44 18.18c0 .795-.645 1.44-1.44 1.44H4.56c-.795 0-1.44-.646-1.44-1.44V4.56c0-.795.645-1.44 1.44-1.44H9c.795 0 1.44.645 1.44 1.44v13.62zm10.44-6c0 .794-.645 1.44-1.44 1.44H15c-.795 0-1.44-.646-1.44-1.44V4.56c0-.795.645-1.44 1.44-1.44h4.44c.795 0 1.44.645 1.44 1.44v7.62z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Card moved</span><span class="notif__time">31m ago</span></div>
+        <div class="notif__msg">Final master &rarr; Review queue</div>
+      </div>
+    </div>
+
+    <div class="notif" data-depth="0.012" data-layer="far" data-float-y="2" data-float-x="3" data-float-dur="8.0" style="bottom:5%;right:30%;filter:blur(2px);">
+      <div class="notif__icon" style="background:#5B5FC7;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M20.625 8.5h-6.25a.625.625 0 0 0-.625.625v6.25c0 .345.28.625.625.625h3.127v3.75a.625.625 0 0 0 .625.625h1.875a2.5 2.5 0 0 0 2.5-2.5v-7a2 2 0 0 0-1.877-2.375zM19 7.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5zm-5.75 0h-2.5A5.75 5.75 0 0 0 5 13.25v4.125c0 .345.28.625.625.625h7.75a.625.625 0 0 0 .625-.625V13.25A5.75 5.75 0 0 0 8.25 7.5h5zm-3 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Missed call</span><span class="notif__time">45m ago</span></div>
+        <div class="notif__msg">Alex tried to reach you about the mix</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__content">
+    <div class="hero__eyebrow">The operating system for music releases</div>
+    <h1 class="hero__h1">Release chaos<br>ends here.</h1>
+    <p class="hero__body">Stop juggling spreadsheets, Slack threads, and email chains. One platform for your entire rollout.</p>
+    <div class="hero__actions">
+      <a href="javascript:void(0)" class="btn-orange" id="heroBookBtn">Book a demo</a>
+      <a href="#value-prop" class="hero__ghost">See how it works</a>
+    </div>
+    <div class="hero-inline-form" id="heroInlineForm">
+      <div class="hero-inline-form__inner">
+        <div style="padding-top:24px;">
+          <form id="heroInlineFormEl">
+            <div class="hero-inline-form__fields">
+              <input type="text" class="hero-inline-form__input" placeholder="First name" required>
+              <input type="text" class="hero-inline-form__input" placeholder="Last name" required>
+              <input type="email" class="hero-inline-form__input" placeholder="Email" required>
+              <button type="submit" class="hero-inline-form__btn">Book now</button>
+            </div>
+          </form>
+          <div class="hero-inline-form__close">
+            <button type="button" class="hero-inline-form__close-btn" id="heroInlineClose">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     VALUE PROP
+     ======================================== -->
+<section class="value-prop sr-blur" id="value-prop">
+  <p class="value-prop__text">
+    From singles to full albums, Team makes your entire rollout <span>structured, visible, and impossible to drop.</span>
+  </p>
+  <a href="#form" class="vp-cta">Talk to an expert &rarr;</a>
+</section>
+
+<!-- ========================================
+     PRODUCT PREVIEW — Screenshot image
+     ======================================== -->
+<section class="product-preview" id="product">
+  <div class="product-preview-inner sr-scale">
+    <div class="product-frame" id="playTrigger">
+      <video class="product-img" autoplay loop muted playsinline>
+        <source src="team-ui-compressed.mp4" type="video/mp4">
+        <source src="team-ui-compressed.mp4" type="video/mp4">
+      </video>
+      <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     TWO PILLARS — Side-by-side columns
+     ======================================== -->
+<section class="pillars sr" id="pillars">
+  <div class="pillars__inner">
+    <div class="pillars__header">
+      <div class="pillars__label sr sr-d1">What's inside</div>
+      <h2 class="pillars__headline sr sr-d2">Two layers. One platform.</h2>
+      <p class="pillars__subtitle sr sr-d3">Orchestration to run it. Intelligence to sharpen it.</p>
+    </div>
+
+    <!-- Mobile toggle (hidden on desktop) -->
+    <div class="pillar-mobile-toggle" id="pillarMobileToggle">
+      <div class="pillar-mobile-toggle__bar">
+        <div class="pillar-mobile-toggle__indicator" id="pillarMobileIndicator"></div>
+        <button class="pillar-mobile-toggle__btn active" data-pillar-mobile="orchestration">Orchestration</button>
+        <button class="pillar-mobile-toggle__btn" data-pillar-mobile="intelligence">Intelligence</button>
+      </div>
+    </div>
+
+    <div class="pillars__grid sr sr-d4">
+      <!-- Orchestration Column -->
+      <div class="pillar-col mobile-active" id="pillar-orchestration">
+        <div class="pillar-col__body">
+          <div class="pillar-col__number">01 &mdash; Orchestration</div>
+          <h3 class="pillar-col__headline">Plan, coordinate, and execute from one system</h3>
+          <p class="pillar-col__desc">Replace scattered tools with a single timeline. Every task, deadline, budget line, and team conversation &mdash; connected and visible.</p>
+          <div class="pillar-col__trigger"><span class="pillar-col__trigger-text">Hover for more</span> <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <div class="pillar-drawer">
+            <ul class="pillar-features">
+              <li class="pillar-feature" style="transition-delay:0ms;">
+                <span class="pillar-feature__tag">01</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Rollout Timeline</div>
+                  <div class="pillar-feature__desc">Drag-and-drop release plans with smart dependencies and one shared view</div>
+                </div>
+              </li>
+              <li class="pillar-feature" style="transition-delay:70ms;">
+                <span class="pillar-feature__tag">02</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Budget Tracking</div>
+                  <div class="pillar-feature__desc">Real-time spend tracking across every release &mdash; no more post-quarter reconciliation</div>
+                </div>
+              </li>
+              <li class="pillar-feature" style="transition-delay:140ms;">
+                <span class="pillar-feature__tag">03</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Team Collaboration</div>
+                  <div class="pillar-feature__desc">Chat, files, and tasks in context &mdash; not buried in channels nobody checks</div>
+                </div>
+              </li>
+              <li class="pillar-feature" style="transition-delay:210ms;">
+                <span class="pillar-feature__tag">04</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Rollout Templates</div>
+                  <div class="pillar-feature__desc">Pre-built plans for singles, EPs, albums. Start from proven structure.</div>
+                </div>
+              </li>
+              <li class="pillar-feature" style="transition-delay:280ms;">
+                <span class="pillar-feature__tag">05</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Connected Tools</div>
+                  <div class="pillar-feature__desc">Pull in data from Spotify, social, and distribution automatically</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intelligence Column -->
+      <div class="pillar-col" id="pillar-intelligence">
+        <div class="pillar-col__body">
+          <div class="pillar-col__number">02 &mdash; Intelligence</div>
+          <h3 class="pillar-col__headline">Context and AI that make every release smarter</h3>
+          <p class="pillar-col__desc">Understand your artist's position, automate the repetitive work, and catch problems before they become fires.</p>
+          <div class="pillar-col__trigger"><span class="pillar-col__trigger-text">Hover for more</span> <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <div class="pillar-drawer">
+            <ul class="pillar-features">
+              <li class="pillar-feature" style="transition-delay:0ms;">
+                <span class="pillar-feature__tag">01</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Artist Intelligence</div>
+                  <div class="pillar-feature__desc">Market position, streaming trends, and competitive landscape at a glance</div>
+                </div>
+              </li>
+              <li class="pillar-feature" style="transition-delay:70ms;">
+                <span class="pillar-feature__tag">02</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">AI Teammate</div>
+                  <div class="pillar-feature__desc">Drafts copy, chases tasks, flags risks. Learns your artist's voice and team patterns.</div>
+                </div>
+              </li>
+              <li class="pillar-feature" style="transition-delay:140ms;">
+                <span class="pillar-feature__tag">03</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Release Review</div>
+                  <div class="pillar-feature__desc">Check every asset against your timeline. Catch gaps before release day.</div>
+                </div>
+              </li>
+              <li class="pillar-feature" style="transition-delay:210ms;">
+                <span class="pillar-feature__tag">04</span>
+                <div class="pillar-feature__text">
+                  <div class="pillar-feature__name">Natural Language Search</div>
+                  <div class="pillar-feature__desc">Ask anything: "What's the status of Friday's release?" No digging required.</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     USE CASES
+     ======================================== -->
+<section class="use-cases sr" id="useCases">
+  <div class="use-cases__inner">
+    <div class="use-cases__header">
+      <div class="use-cases__label sr sr-d1">Built for every role</div>
+      <h2 class="use-cases__headline sr sr-d2">One platform. One team.</h2>
+      <p class="use-cases__subtitle sr sr-d3">Whether you manage one artist or fifty, Team adapts to how you work.</p>
+    </div>
+
+    <div class="tab-bar sr sr-d4" id="tabBar">
+      <button class="tab-btn active" data-tab="label">Label Managers</button>
+      <button class="tab-btn" data-tab="artist">Artist Managers</button>
+      <button class="tab-btn" data-tab="marketing">Marketing</button>
+      <button class="tab-btn" data-tab="ar">A&amp;R</button>
+    </div>
+
+    <div class="tab-panels">
+      <!-- Label Managers -->
+      <div class="tab-panel active" id="tab-label">
+        <div class="card-grid">
+          <div class="card-grid__item">
+
+            <div class="card-title">Cross-roster visibility</div>
+            <div class="card-desc">See every release across every artist in one view. Know what's on track, what's at risk, and where to focus today.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Budget oversight</div>
+            <div class="card-desc">Track spend across releases and artists in real time. No more end-of-quarter surprises.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Team performance</div>
+            <div class="card-desc">Understand who's delivering, what's bottlenecking, and where your process breaks down &mdash; with data, not gut feel.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Strategic planning</div>
+            <div class="card-desc">Map your release calendar against market windows, competitor drops, and cultural moments.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Artist Managers -->
+      <div class="tab-panel" id="tab-artist">
+        <div class="card-grid">
+          <div class="card-grid__item">
+
+            <div class="card-title">Single artist command centre</div>
+            <div class="card-desc">Timeline, budget, assets, comms &mdash; everything about your artist's release in one place.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Stakeholder updates</div>
+            <div class="card-desc">Generate release status updates for artists, labels, and partners in one click.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Deadline tracking</div>
+            <div class="card-desc">Never miss a playlist pitch window or asset delivery date. Smart notifications before things are late.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Cross-functional coordination</div>
+            <div class="card-desc">Keep PR, social, paid, and distribution aligned without being the human glue.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marketing -->
+      <div class="tab-panel" id="tab-marketing">
+        <div class="card-grid">
+          <div class="card-grid__item">
+
+            <div class="card-title">Campaign planning</div>
+            <div class="card-desc">Build multi-channel marketing plans connected to your release timeline. Social, paid, email &mdash; all in sync.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Content production</div>
+            <div class="card-desc">Brief, draft, review, and approve assets without leaving the platform. AI Teammate handles first drafts.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Performance tracking</div>
+            <div class="card-desc">Connect marketing activity to streaming outcomes. See what's working and shift spend in real time.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Multi-artist coordination</div>
+            <div class="card-desc">Run campaigns across multiple releases without losing the plot. Shared calendars, separate budgets.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- A&R -->
+      <div class="tab-panel" id="tab-ar">
+        <div class="card-grid">
+          <div class="card-grid__item">
+
+            <div class="card-title">Release readiness</div>
+            <div class="card-desc">Know exactly where every release stands &mdash; masters delivered, metadata confirmed, artwork approved.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Market intelligence</div>
+            <div class="card-desc">Understand competitive position, audience overlap, and genre trends before you set a release date.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Playlist strategy</div>
+            <div class="card-desc">Track pitch windows, submission deadlines, and editorial contacts. Never miss an opportunity.</div>
+          </div>
+          <div class="card-grid__item">
+
+            <div class="card-title">Seamless handoff</div>
+            <div class="card-desc">Hand off to marketing, PR, and social once A&amp;R decisions are locked. Context travels with the release.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     FORM CTA
+     ======================================== -->
+<section class="form-cta sr-blur" id="form">
+  <div class="form-cta__mesh"></div>
+
+  <div class="form-notifs" id="formNotifLayer">
+    <div class="form-notif" data-depth="0.03" style="top:10%;left:5%;">
+      <div class="notif__icon" style="background:#4A154B;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zm-1.27 0a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.163 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.163 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.163 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zm0-1.27a2.527 2.527 0 0 1-2.52-2.523 2.527 2.527 0 0 1 2.52-2.52h6.315A2.528 2.528 0 0 1 24 15.163a2.528 2.528 0 0 1-2.522 2.523h-6.315z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Sarah from Marketing</span><span class="notif__time">3m ago</span></div>
+        <div class="notif__msg">URGENT!! Where's the latest file??</div>
+      </div>
+    </div>
+    <div class="form-notif" data-depth="0.025" style="top:15%;right:8%;">
+      <div class="notif__icon" style="background:#217346;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M23 1.5q.41 0 .7.3.3.29.3.7v19q0 .41-.3.7-.29.3-.7.3H7q-.41 0-.7-.3-.3-.29-.3-.7V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h5V2.5q0-.41.3-.7.29-.3.7-.3zM1 16.5h14v-9H1zm7.5-2.25h-2.6l-1.4-2.4-1.4 2.4H.59l2.14-3.5L.73 7.3h2.55L4.5 9.6l1.17-2.3h2.51L6.09 10.8zM23 19V2H7v4h8q.41 0 .7.3.3.29.3.7v10q0 .41-.3.7-.29.3-.7.3H7v4zM20 14v-2h-4v2zm0-4V8h-4v2zm0 8v-2h-4v2z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Release Tracker v28.3</span><span class="notif__time">11m ago</span></div>
+        <div class="notif__msg">Sheet has been updated by James</div>
+      </div>
+    </div>
+    <div class="form-notif" data-depth="0.035" style="bottom:15%;left:10%;">
+      <div class="notif__icon" style="background:#25D366;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Artist Manager</span><span class="notif__time">5m ago</span></div>
+        <div class="notif__msg">Can we talk urgently about the release...</div>
+      </div>
+    </div>
+    <div class="form-notif" data-depth="0.02" style="bottom:20%;right:5%;">
+      <div class="notif__icon" style="background:#4285F4;">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Release sync in 15 min</span><span class="notif__time">22m ago</span></div>
+        <div class="notif__msg">Weekly release standup — 4 attendees</div>
+      </div>
+    </div>
+    <div class="form-notif" data-depth="0.028" style="top:50%;left:2%;">
+      <div class="notif__icon" style="background:#6161FF;">
+        <svg viewBox="0 0 24 24" fill="#fff"><circle cx="5.5" cy="18.5" r="3.5"/><circle cx="12" cy="12" r="3.5"/><circle cx="18.5" cy="5.5" r="3.5"/></svg>
+      </div>
+      <div class="notif__body">
+        <div class="notif__row"><span class="notif__title">Status changed</span><span class="notif__time">14m ago</span></div>
+        <div class="notif__msg">PR outreach moved to Stuck</div>
+      </div>
+    </div>
+  </div>
+  <div class="form-notif-overlay"></div>
+
+  <div class="form-cta__inner">
+    <div class="form-cta__badge">60 days free &middot; No credit card</div>
+    <h2 class="form-cta__h2">Stop losing momentum</h2>
+    <p class="form-cta__sub">See exactly how Team runs your next release. We'll reach out within 24 hours.</p>
+    <div class="form-card" id="formCard">
+      <div class="form-card__label">MEET THE FOUNDERS</div>
+      <form id="demoForm">
+        <div class="form-row">
+          <input type="text" placeholder="First name" required>
+          <input type="text" placeholder="Last name" required>
+        </div>
+        <input class="form-card__email" type="email" placeholder="Business email" required>
+        <button type="submit" class="form-card__btn">Book your 1:1 demo</button>
+      </form>
+      <div class="form-card__footer"><a href="https://teamrollouts.com/pricing" style="color:var(--orange);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:4px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'" target="_blank" rel="noopener">Sign up today for a 60-day free trial <svg style="width:13px;height:13px;transition:transform 0.2s;" onmouseover="this.style.transform='translateX(2px)'" onmouseout="this.style.transform=''" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a><br><span>No credit card required.</span></div>
+      <div class="form-success" id="formSuccess">
+        <div class="form-success__check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 class="form-success__h3">You're in</h3>
+        <p class="form-success__p">We'll reach out within 24 hours to schedule your demo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================
+     FOOTER
+     ======================================== -->
+<footer class="footer">
+  <div class="footer__left">
+    <span class="footer__copy">&copy; 2026 Team Rollouts. All rights reserved.</span>
+  </div>
+  <div class="footer__links">
+    <a href="https://teamrollouts.com/pricing" class="footer__link" target="_blank" rel="noopener">Get Started</a>
+    <a href="https://www.teamrollouts.com/privacy" class="footer__link" target="_blank" rel="noopener">Privacy Policy</a>
+    <a href="https://www.teamrollouts.com/terms" class="footer__link" target="_blank" rel="noopener">Terms of Service</a>
+  </div>
+</footer>
+
+<!-- ========================================
+     FLOATING CTA (desktop)
+     ======================================== -->
+<div class="floating-cta" id="floatingCta">
+  <a href="javascript:void(0)" class="floating-cta__btn">Book a demo &rarr;</a>
+</div>
+
+<!-- ========================================
+     FLOATING BAR (mobile)
+     ======================================== -->
+<div class="floating-bar" id="floatingBar">
+  <a href="javascript:void(0)" class="floating-bar__btn">Book a demo</a>
+</div>
+
+<!-- ========================================
+     VIDEO MODAL
+     ======================================== -->
+<div class="video-modal" id="videoModal">
+  <div class="video-modal__bg" id="videoModalBg"></div>
+  <button class="video-modal__close" id="videoModalClose"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+  <div class="video-modal__content">
+    <video id="modalVideo" playsinline>
+      <source src="team-teaser-compressed.mp4" type="video/mp4">
+    </video>
+    <div class="sound-hint" id="soundHint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      Sound on
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     FORM POPUP
+     ======================================== -->
+<div class="form-popup" id="formPopup">
+  <div class="form-popup__header">
+    <span class="form-popup__title" style="font-size:20px;">Book your 1:1 founder demo</span>
+    <button class="form-popup__close" id="formPopupClose">
+      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" fill="none" stroke="currentColor"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="form-popup__body">
+    <form id="popupForm">
+      <div class="form-popup__row">
+        <input type="text" class="form-popup__input" placeholder="First name" required>
+        <input type="text" class="form-popup__input" placeholder="Last name" required>
+      </div>
+      <input type="email" class="form-popup__input form-popup__input--full" placeholder="Business email" required>
+      <button type="submit" class="form-popup__btn">Book now</button>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================
+     JAVASCRIPT
+     ======================================== -->
+<script>
+(function() {
+  'use strict';
+
+  /* ========================================
+     NAV SCROLL STATE
+     ======================================== */
+  var navWrapper = document.getElementById('navWrapper');
+  function updateNav() {
+    navWrapper.classList.toggle('scrolled', window.scrollY > 50);
+  }
+  window.addEventListener('scroll', updateNav, { passive: true });
+
+  /* ========================================
+     HERO PARALLAX + IDLE FLOAT
+     ======================================== */
+  var hero = document.getElementById('hero');
+  var notifs = document.querySelectorAll('#notifLayer .notif');
+  var mouseX = 0.5, mouseY = 0.5;
+  var currentX = 0.5, currentY = 0.5;
+
+  hero.addEventListener('mousemove', function(e) {
+    var rect = hero.getBoundingClientRect();
+    mouseX = (e.clientX - rect.left) / rect.width;
+    mouseY = (e.clientY - rect.top) / rect.height;
+  });
+
+  /* ---- HERO NOTIFICATIONS: animate in on load ---- */
+  notifs.forEach(function(n, i) {
+    setTimeout(function() { n.classList.add('notif-in'); }, 400 + i * 120);
+  });
+
+  /* ---- HERO NOTIFICATIONS: out on scroll, back in on scroll up ---- */
+  var heroNotifsVisible = true;
+  function updateHeroNotifs() {
+    var heroRect = hero.getBoundingClientRect();
+    var heroVisible = heroRect.bottom > 100;
+    if (heroVisible && !heroNotifsVisible) {
+      heroNotifsVisible = true;
+      notifs.forEach(function(n, i) {
+        setTimeout(function() { n.classList.add('notif-in'); }, i * 80);
+      });
+    } else if (!heroVisible && heroNotifsVisible) {
+      heroNotifsVisible = false;
+      notifs.forEach(function(n) { n.classList.remove('notif-in'); });
+    }
+  }
+  window.addEventListener('scroll', updateHeroNotifs, { passive: true });
+
+  /* ---- FORM SECTION PARALLAX ---- */
+  var formSectionEl = document.querySelector('.form-cta');
+  var formNotifs = document.querySelectorAll('.form-notif');
+  var fcx = 0.5, fcy = 0.5, ftx = 0.5, fty = 0.5;
+  formSectionEl.addEventListener('mousemove', function(e) {
+    var r = formSectionEl.getBoundingClientRect();
+    ftx = (e.clientX - r.left) / r.width;
+    fty = (e.clientY - r.top) / r.height;
+  });
+  formSectionEl.addEventListener('mouseleave', function() { ftx = 0.5; fty = 0.5; });
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function animateParallax(time) {
+    currentX += (mouseX - currentX) * 0.05;
+    currentY += (mouseY - currentY) * 0.05;
+
+    var dx = currentX - 0.5;
+    var dy = currentY - 0.5;
+
+    for (var i = 0; i < notifs.length; i++) {
+      var n = notifs[i];
+      var depth = parseFloat(n.dataset.depth) || 0.03;
+      var fy = parseFloat(n.dataset.floatY) || 0;
+      var fx = parseFloat(n.dataset.floatX) || 0;
+      var dur = parseFloat(n.dataset.floatDur) || 5;
+      var phase = depth * 1000;
+      var t = (time / 1000 + phase);
+      var period = 2 * Math.PI / dur;
+
+      var floatX = Math.sin(t * period) * fx;
+      var floatY = Math.sin(t * period + 0.5) * fy;
+
+      var px = dx * depth * 2400 + floatX;
+      var py = dy * depth * 2400 + floatY;
+      n.style.transform = 'translate(' + px.toFixed(2) + 'px, ' + py.toFixed(2) + 'px)';
+    }
+
+    /* Form section parallax */
+    fcx = lerp(fcx, ftx, 0.04);
+    fcy = lerp(fcy, fty, 0.04);
+    var fdx = (fcx - 0.5), fdy = (fcy - 0.5);
+    formNotifs.forEach(function(fn) {
+      var d = parseFloat(fn.dataset.depth) || 0.025;
+      fn.style.transform = 'translate(' + (fdx * d * 1500).toFixed(1) + 'px,' + (fdy * d * 1500).toFixed(1) + 'px)';
+    });
+
+    requestAnimationFrame(animateParallax);
+  }
+  requestAnimationFrame(animateParallax);
+
+  /* ========================================
+     SCROLL REVEAL (IntersectionObserver)
+     ======================================== */
+  var srElements = document.querySelectorAll('.sr, .sr-blur, .sr-scale');
+  var srObserver = new IntersectionObserver(function(entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].isIntersecting) {
+        entries[i].target.classList.add('visible');
+        srObserver.unobserve(entries[i].target);
+      }
+    }
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  for (var i = 0; i < srElements.length; i++) {
+    srObserver.observe(srElements[i]);
+  }
+
+  /* ========================================
+     PILLAR FEATURES — Stagger animation
+     ======================================== */
+  var pillarSection = document.getElementById('pillars');
+  var pillarFeatureObserver = new IntersectionObserver(function(entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].isIntersecting) {
+        var features = pillarSection.querySelectorAll('.pillar-feature');
+        for (var k = 0; k < features.length; k++) {
+          (function(feat, delay) {
+            setTimeout(function() { feat.classList.add('show'); }, delay);
+          })(features[k], k * 80);
+        }
+        pillarFeatureObserver.unobserve(pillarSection);
+      }
+    }
+  }, { threshold: 0.15 });
+  pillarFeatureObserver.observe(pillarSection);
+
+  /* ========================================
+     PILLAR DRAWER — HOVER (DESKTOP) / TAP (MOBILE)
+     ======================================== */
+  var pillarCols = document.querySelectorAll('.pillar-col');
+  var isMobile = window.matchMedia('(max-width: 768px)');
+
+  // Set trigger text based on device
+  function updateTriggerText() {
+    var triggers = document.querySelectorAll('.pillar-col__trigger-text');
+    triggers.forEach(function(t) {
+      var col = t.closest('.pillar-col');
+      if (isMobile.matches) {
+        t.textContent = col.classList.contains('drawer-open') ? 'Tap to close' : 'Tap for more';
+      } else {
+        t.textContent = 'Hover for more';
+      }
+    });
+  }
+
+  pillarCols.forEach(function(col) {
+    // Desktop: hover — only open this one, close others
+    col.addEventListener('mouseenter', function() {
+      if (!isMobile.matches) {
+        pillarCols.forEach(function(other) { if (other !== col) other.classList.remove('drawer-open'); });
+        col.classList.add('drawer-open');
+      }
+    });
+    col.addEventListener('mouseleave', function() {
+      if (!isMobile.matches) col.classList.remove('drawer-open');
+    });
+
+    // Mobile: tap trigger
+    var trigger = col.querySelector('.pillar-col__trigger');
+    if (trigger) {
+      trigger.addEventListener('click', function() {
+        if (isMobile.matches) {
+          col.classList.toggle('drawer-open');
+          updateTriggerText();
+        }
+      });
+    }
+  });
+
+  isMobile.addEventListener('change', updateTriggerText);
+  updateTriggerText();
+
+  /* ========================================
+     PILLAR MOBILE TOGGLE
+     ======================================== */
+  var pillarMobileBtns = document.querySelectorAll('[data-pillar-mobile]');
+  var pillarMobileIndicator = document.getElementById('pillarMobileIndicator');
+  var pillarOrch = document.getElementById('pillar-orchestration');
+  var pillarIntel = document.getElementById('pillar-intelligence');
+
+  for (var pm = 0; pm < pillarMobileBtns.length; pm++) {
+    pillarMobileBtns[pm].addEventListener('click', function() {
+      var name = this.dataset.pillarMobile;
+      for (var i = 0; i < pillarMobileBtns.length; i++) {
+        pillarMobileBtns[i].classList.toggle('active', pillarMobileBtns[i].dataset.pillarMobile === name);
+      }
+      if (pillarMobileIndicator) {
+        pillarMobileIndicator.classList.toggle('right', name === 'intelligence');
+      }
+      pillarOrch.classList.toggle('mobile-active', name === 'orchestration');
+      pillarIntel.classList.toggle('mobile-active', name === 'intelligence');
+      // Close drawers on switch
+      pillarOrch.classList.remove('drawer-open');
+      pillarIntel.classList.remove('drawer-open');
+      updateTriggerText();
+    });
+  }
+
+  /* ========================================
+     USE CASE TABS
+     ======================================== */
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var tabPanels = {
+    label: document.getElementById('tab-label'),
+    artist: document.getElementById('tab-artist'),
+    marketing: document.getElementById('tab-marketing'),
+    ar: document.getElementById('tab-ar')
+  };
+
+  for (var t = 0; t < tabBtns.length; t++) {
+    tabBtns[t].addEventListener('click', function() {
+      var tabName = this.dataset.tab;
+      for (var i = 0; i < tabBtns.length; i++) {
+        tabBtns[i].classList.remove('active');
+      }
+      this.classList.add('active');
+      var tKeys = ['label', 'artist', 'marketing', 'ar'];
+      for (var j = 0; j < tKeys.length; j++) {
+        tabPanels[tKeys[j]].classList.toggle('active', tKeys[j] === tabName);
+      }
+    });
+  }
+
+  /* ========================================
+     FLOATING CTA — VISIBLE FROM TOP, COLOUR SWITCH
+     ======================================== */
+  var floatingCta = document.getElementById('floatingCta');
+  var floatingBar = document.getElementById('floatingBar');
+  var darkSections = document.querySelectorAll('.chaos-hero, .form-cta, .footer');
+  var formSection = document.getElementById('form');
+
+  function updateFloating() {
+    if (!floatingCta) return;
+    var ctaRect = floatingCta.getBoundingClientRect();
+    var ctaCenter = ctaRect.top + ctaRect.height / 2;
+
+    // Hide over form section
+    var formTop = formSection ? formSection.getBoundingClientRect().top : 99999;
+    var hideOverForm = formTop < window.innerHeight * 0.6;
+    floatingCta.style.opacity = hideOverForm ? '0' : '1';
+    floatingCta.style.pointerEvents = hideOverForm ? 'none' : 'auto';
+    if (floatingBar) {
+      floatingBar.style.transform = hideOverForm ? 'translateY(100%)' : 'translateY(0)';
+      floatingBar.style.opacity = hideOverForm ? '0' : '1';
+      floatingBar.style.pointerEvents = hideOverForm ? 'none' : 'auto';
+    }
+
+    // Check if overlapping a dark section
+    var onDark = false;
+    darkSections.forEach(function(sec) {
+      var r = sec.getBoundingClientRect();
+      if (ctaCenter >= r.top && ctaCenter <= r.bottom) onDark = true;
+    });
+    floatingCta.classList.toggle('on-dark', onDark);
+    if (floatingBar) floatingBar.classList.toggle('on-dark', onDark);
+  }
+  window.addEventListener('scroll', updateFloating, { passive: true });
+  updateFloating();
+
+  /* ========================================
+     FORM SUBMIT — SUCCESS STATE
+     ======================================== */
+  var demoForm = document.getElementById('demoForm');
+  var formSuccess = document.getElementById('formSuccess');
+  var formCard = document.getElementById('formCard');
+
+  demoForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    demoForm.style.display = 'none';
+    formCard.querySelector('.form-card__label').style.display = 'none';
+    formCard.querySelector('.form-card__footer').style.display = 'none';
+    formSuccess.classList.add('show');
+  });
+
+  /* ========================================
+     FORM POPUP
+     ======================================== */
+  var formPopup = document.getElementById('formPopup');
+  var formPopupClose = document.getElementById('formPopupClose');
+  var popupForm = document.getElementById('popupForm');
+
+  function openFormPopup() {
+    formPopup.classList.add('open');
+    // Hide floating CTA/bar when popup is open
+    if (floatingCta) { floatingCta.style.opacity = '0'; floatingCta.style.pointerEvents = 'none'; }
+    if (floatingBar) { floatingBar.style.transform = 'translateY(100%)'; floatingBar.style.opacity = '0'; floatingBar.style.pointerEvents = 'none'; }
+  }
+  function closeFormPopup() {
+    formPopup.classList.remove('open');
+    updateFloating();
+  }
+
+  // Floating CTA click opens popup instead of navigating
+  floatingCta.querySelector('a').addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    openFormPopup();
+  });
+  if (floatingBar) {
+    floatingBar.querySelector('a').addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openFormPopup();
+    });
+  }
+
+  formPopupClose.addEventListener('click', closeFormPopup);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && formPopup.classList.contains('open')) closeFormPopup();
+  });
+
+  popupForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    popupForm.parentElement.innerHTML = '<div style="text-align:center;padding:24px 0;"><div style="font-size:16px;font-weight:700;color:#1d1d1f;margin-bottom:4px;">You\'re in</div><div style="font-size:13px;color:#86868b;">We\'ll be in touch shortly.</div></div>';
+  });
+
+  /* ========================================
+     VIDEO MODAL
+     ======================================== */
+  var playTrigger = document.getElementById('playTrigger');
+  var videoModal = document.getElementById('videoModal');
+  var modalVideo = document.getElementById('modalVideo');
+  var videoModalClose = document.getElementById('videoModalClose');
+  var videoModalBg = document.getElementById('videoModalBg');
+
+  var soundHint = document.getElementById('soundHint');
+  var soundTimer;
+
+  function openModal() {
+    videoModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    modalVideo.play();
+    setTimeout(function(){ soundHint.classList.add('show'); }, 600);
+    soundTimer = setTimeout(function(){ soundHint.classList.remove('show'); }, 4500);
+  }
+  function closeModal() {
+    videoModal.classList.remove('open');
+    document.body.style.overflow = '';
+    modalVideo.pause();
+    modalVideo.currentTime = 0;
+    soundHint.classList.remove('show');
+    clearTimeout(soundTimer);
+  }
+
+  playTrigger.addEventListener('click', openModal);
+  videoModalClose.addEventListener('click', closeModal);
+  videoModalBg.addEventListener('click', closeModal);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && videoModal.classList.contains('open')) closeModal();
+  });
+
+  /* ========================================
+     HERO INLINE FORM (desktop only)
+     ======================================== */
+  var heroBookBtn = document.getElementById('heroBookBtn');
+  var heroInlineForm = document.getElementById('heroInlineForm');
+  var heroInlineClose = document.getElementById('heroInlineClose');
+  var heroInlineFormEl = document.getElementById('heroInlineFormEl');
+
+  if (heroBookBtn && heroInlineForm) {
+    var heroActions = heroBookBtn.parentElement;
+
+    function openHeroForm() {
+      heroActions.classList.add('form-mode');
+      heroInlineForm.classList.add('open');
+      setTimeout(function() {
+        var inp = heroInlineForm.querySelector('input');
+        if (inp) inp.focus();
+      }, 400);
+    }
+    function closeHeroForm() {
+      heroInlineForm.classList.remove('open');
+      setTimeout(function() {
+        heroActions.classList.remove('form-mode');
+      }, 250);
+    }
+
+    heroBookBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (window.innerWidth <= 768) {
+        openFormPopup();
+      } else {
+        openHeroForm();
+      }
+    });
+    heroInlineClose.addEventListener('click', closeHeroForm);
+    heroInlineFormEl.addEventListener('submit', function(e) {
+      e.preventDefault();
+      heroInlineForm.innerHTML = '<div style="text-align:center;padding:8px 0;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">You\'re in \u2014 we\'ll be in touch shortly.</div>';
+    });
+  }
+
+  /* ========================================
+     PRODUCT FRAME — SCROLL-DRIVEN EXPAND
+     ======================================== */
+  var productInner = document.querySelector('.product-preview-inner');
+  var productFrame = productInner ? productInner.querySelector('.product-frame') : null;
+  var productSection = document.querySelector('.product-preview');
+
+  if (productInner && productFrame && productSection) {
+    var maxRadius = 16;
+    var maxPad = 32; // matches default side padding
+    var maxW = 1120; // --max-w
+
+    function updateProductExpand() {
+      var rect = productSection.getBoundingClientRect();
+      var vh = window.innerHeight;
+      var frameRect = productFrame.getBoundingClientRect();
+      var frameCenter = frameRect.top + frameRect.height / 2;
+      var vpCenter = vh / 2;
+
+      // Progress with a dead zone — stays at 1.0 when near centre
+      var dist = Math.abs(frameCenter - vpCenter);
+      var deadZone = vh * 0.12; // stays fully expanded within this range
+      var range = vh * 0.5;
+      var adjustedDist = Math.max(0, dist - deadZone);
+      var adjustedRange = range - deadZone;
+      var progress = Math.max(0, Math.min(1, 1 - (adjustedDist / adjustedRange)));
+
+      // Ease the progress for smoother feel
+      var t = progress * progress;
+
+      // Interpolate values
+      var radius = maxRadius * (1 - t);
+      var pad = maxPad * (1 - t);
+      var width = maxW + (window.innerWidth - maxW) * t;
+
+      productInner.style.maxWidth = Math.round(width) + 'px';
+      productInner.style.padding = '0 ' + Math.round(pad) + 'px';
+      productFrame.style.borderRadius = radius.toFixed(1) + 'px';
+      productFrame.style.borderColor = t > 0.8 ? 'transparent' : '';
+      productFrame.style.boxShadow = t > 0.5 ? 'none' : '';
+    }
+    window.addEventListener('scroll', updateProductExpand, { passive: true });
+    window.addEventListener('resize', updateProductExpand, { passive: true });
+    updateProductExpand();
+  }
+
+  /* ========================================
+     SMOOTH ANCHOR SCROLLING
+     ======================================== */
+  var anchors = document.querySelectorAll('a[href^="#"]');
+  for (var a = 0; a < anchors.length; a++) {
+    anchors[a].addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        var offset = 40;
+        var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
