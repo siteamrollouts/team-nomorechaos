@@ -275,6 +275,7 @@
 
   demoForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    if (typeof fbq === 'function') fbq('track', 'Lead');
     demoForm.style.display = 'none';
     formCard.querySelector('.form-card__label').style.display = 'none';
     formCard.querySelector('.form-card__footer').style.display = 'none';
@@ -320,6 +321,7 @@
 
   popupForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    if (typeof fbq === 'function') fbq('track', 'Lead');
     popupForm.parentElement.innerHTML = '<div style="text-align:center;padding:24px 0;"><div style="font-size:16px;font-weight:700;color:#1d1d1f;margin-bottom:4px;">You\'re in</div><div style="font-size:13px;color:#86868b;">We\'ll be in touch shortly.</div></div>';
   });
 
@@ -395,6 +397,7 @@
     heroInlineClose.addEventListener('click', closeHeroForm);
     heroInlineFormEl.addEventListener('submit', function(e) {
       e.preventDefault();
+      if (typeof fbq === 'function') fbq('track', 'Lead');
       heroInlineForm.innerHTML = '<div style="text-align:center;padding:8px 0;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">You\'re in \u2014 we\'ll be in touch shortly.</div>';
     });
   }
