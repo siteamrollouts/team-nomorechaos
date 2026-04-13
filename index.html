@@ -430,7 +430,13 @@ input { font-family: inherit; }
   font-size: clamp(24px, 3.2vw, 34px); font-weight: 600;
   line-height: 1.35; color: var(--text);
 }
-.value-prop__text span { color: var(--orange); }
+.value-prop__text .vp-word {
+  display: inline-block;
+  opacity: 0.12;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.value-prop__text .vp-word.lit { opacity: 1; }
+.value-prop__text .vp-word.vp-orange.lit { color: var(--orange); }
 .vp-cta {
   display: inline-block;
   margin-top: 28px;
@@ -1098,8 +1104,7 @@ input { font-family: inherit; }
      VALUE PROP
      ======================================== -->
 <section class="value-prop sr-blur" id="value-prop">
-  <p class="value-prop__text">
-    From singles to full albums, Team makes your entire rollout <span style="color:var(--orange);">structured, visible, and impossible to drop.</span>
+  <p class="value-prop__text" id="vpText" data-vp-text="From singles to full albums, Team makes your entire rollout |structured, visible, and impossible to drop.">
   </p>
   <a href="#form" class="vp-cta">Talk to an expert &rarr;</a>
 </section>
@@ -1111,8 +1116,8 @@ input { font-family: inherit; }
   <div class="product-preview-inner sr-scale">
     <div class="product-frame" id="playTrigger">
       <video class="product-img" autoplay loop muted playsinline>
-        <source src="Team%20UI%20Example%2002.mov" type="video/quicktime">
-        <source src="Team%20UI%20Example%2002.mov" type="video/mp4">
+        <source src="team-ui-compressed.mp4" type="video/mp4">
+        <source src="team-ui-compressed.mp4" type="video/mp4">
       </video>
       <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
     </div>
@@ -1425,7 +1430,7 @@ input { font-family: inherit; }
   <button class="video-modal__close" id="videoModalClose"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
   <div class="video-modal__content">
     <video id="modalVideo" playsinline>
-      <source src="Team%20-%20Organic%20Social%20-%20Instagram%20Social%20Post%20-%20260320%20Long%20Teaser%2003c.mp4" type="video/mp4">
+      <source src="team-teaser-compressed.mp4" type="video/mp4">
     </video>
     <div class="sound-hint" id="soundHint">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
@@ -1859,6 +1864,38 @@ input { font-family: inherit; }
       e.preventDefault();
       heroInlineForm.innerHTML = '<div style="text-align:center;padding:8px 0;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">You\'re in \u2014 we\'ll be in touch shortly.</div>';
     });
+  }
+
+  /* ========================================
+     VALUE PROP — WORD-BY-WORD SCROLL REVEAL
+     ======================================== */
+  var vpEl = document.getElementById('vpText');
+  if (vpEl) {
+    var vpRaw = vpEl.dataset.vpText;
+    var parts = vpRaw.split('|');
+    var html = '';
+    parts.forEach(function(part, pi) {
+      var words = part.split(' ');
+      words.forEach(function(w, wi) {
+        var cls = pi > 0 ? 'vp-word vp-orange' : 'vp-word';
+        html += '<span class="' + cls + '">' + w + '</span> ';
+      });
+    });
+    vpEl.innerHTML = html.trim();
+
+    var vpWords = vpEl.querySelectorAll('.vp-word');
+    function updateVpWords() {
+      var rect = vpEl.getBoundingClientRect();
+      var vh = window.innerHeight;
+      // Progress 0 to 1 as element scrolls from bottom of viewport to centre
+      var progress = Math.max(0, Math.min(1, 1 - (rect.top - vh * 0.3) / (vh * 0.5)));
+      var wordsToLight = Math.floor(progress * vpWords.length);
+      vpWords.forEach(function(w, i) {
+        w.classList.toggle('lit', i < wordsToLight);
+      });
+    }
+    window.addEventListener('scroll', updateVpWords, { passive: true });
+    updateVpWords();
   }
 
   /* ========================================
