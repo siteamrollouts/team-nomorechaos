@@ -440,11 +440,10 @@
 
   if (productInner && productFrame && productSection) {
     var maxRadius = 16;
-    var maxPad = 32; // matches default side padding
-    var maxW = 1120; // --max-w
+    var startScale = 0.92; // scale when far from centre
+    var expandTicking = false;
 
     function updateProductExpand() {
-      var rect = productSection.getBoundingClientRect();
       var vh = window.innerHeight;
       var frameRect = productFrame.getBoundingClientRect();
       var frameCenter = frameRect.top + frameRect.height / 2;
@@ -452,7 +451,7 @@
 
       // Progress with a dead zone — stays at 1.0 when near centre
       var dist = Math.abs(frameCenter - vpCenter);
-      var deadZone = vh * 0.12; // stays fully expanded within this range
+      var deadZone = vh * 0.12;
       var range = vh * 0.5;
       var adjustedDist = Math.max(0, dist - deadZone);
       var adjustedRange = range - deadZone;
@@ -461,19 +460,29 @@
       // Ease the progress for smoother feel
       var t = progress * progress;
 
-      // Interpolate values
+      // GPU-composited transform instead of layout-triggering width/padding
+      var scale = startScale + (1 - startScale) * t;
       var radius = maxRadius * (1 - t);
-      var pad = maxPad * (1 - t);
-      var width = maxW + (window.innerWidth - maxW) * t;
 
-      productInner.style.maxWidth = Math.round(width) + 'px';
-      productInner.style.padding = '0 ' + Math.round(pad) + 'px';
-      productFrame.style.borderRadius = radius.toFixed(1) + 'px';
+      productInner.style.transform = 'scale(' + scale + ')';
+      productInner.style.willChange = 'transform';
+      productFrame.style.borderRadius = radius.toFixed(2) + 'px';
       productFrame.style.borderColor = t > 0.8 ? 'transparent' : '';
       productFrame.style.boxShadow = t > 0.5 ? 'none' : '';
     }
-    window.addEventListener('scroll', updateProductExpand, { passive: true });
-    window.addEventListener('resize', updateProductExpand, { passive: true });
+
+    function onExpandScroll() {
+      if (!expandTicking) {
+        requestAnimationFrame(function() {
+          updateProductExpand();
+          expandTicking = false;
+        });
+        expandTicking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onExpandScroll, { passive: true });
+    window.addEventListener('resize', onExpandScroll, { passive: true });
     updateProductExpand();
   }
 
