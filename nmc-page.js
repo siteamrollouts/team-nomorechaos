@@ -267,6 +267,36 @@
   updateFloating();
 
   /* ========================================
+     HUBSPOT FORM SUBMISSION
+     ======================================== */
+  var HS_PORTAL = '244049776';
+  var HS_FORM = 'b9f79294-23dc-453c-a339-136bf31d99e7';
+  var HS_URL = 'https://api.hsforms.com/submissions/v3/integration/submit/' + HS_PORTAL + '/' + HS_FORM;
+
+  function submitToHubSpot(firstName, lastName, email) {
+    var data = {
+      fields: [
+        { name: 'firstname', value: firstName },
+        { name: 'lastname', value: lastName },
+        { name: 'email', value: email }
+      ],
+      context: {
+        pageUri: window.location.href,
+        pageName: document.title
+      }
+    };
+    // Get HubSpot tracking cookie if available
+    var hutk = document.cookie.replace(/(?:(?:^|.*;\s*)hubspotutk\s*=\s*([^;]*).*$)|^.*$/, '$1');
+    if (hutk) data.context.hutk = hutk;
+
+    fetch(HS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  }
+
+  /* ========================================
      FORM SUBMIT — SUCCESS STATE
      ======================================== */
   var demoForm = document.getElementById('demoForm');
@@ -275,6 +305,8 @@
 
   demoForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    var inputs = demoForm.querySelectorAll('input');
+    submitToHubSpot(inputs[0].value, inputs[1].value, inputs[2].value);
     if (typeof fbq === 'function') fbq('track', 'Lead');
     demoForm.style.display = 'none';
     formCard.querySelector('.form-card__label').style.display = 'none';
@@ -321,6 +353,8 @@
 
   popupForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    var inputs = popupForm.querySelectorAll('input');
+    submitToHubSpot(inputs[0].value, inputs[1].value, inputs[2].value);
     if (typeof fbq === 'function') fbq('track', 'Lead');
     popupForm.parentElement.innerHTML = '<div style="text-align:center;padding:24px 0;"><div style="font-size:16px;font-weight:700;color:#1d1d1f;margin-bottom:4px;">You\'re in</div><div style="font-size:13px;color:#86868b;">We\'ll be in touch shortly.</div></div>';
   });
@@ -397,6 +431,8 @@
     heroInlineClose.addEventListener('click', closeHeroForm);
     heroInlineFormEl.addEventListener('submit', function(e) {
       e.preventDefault();
+      var inputs = heroInlineFormEl.querySelectorAll('input');
+      submitToHubSpot(inputs[0].value, inputs[1].value, inputs[2].value);
       if (typeof fbq === 'function') fbq('track', 'Lead');
       heroInlineForm.innerHTML = '<div style="text-align:center;padding:8px 0;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;">You\'re in \u2014 we\'ll be in touch shortly.</div>';
     });
